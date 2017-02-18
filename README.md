@@ -1,7 +1,7 @@
 ## Launching App
 
 1) We need a Redis instance. Try running a Docker image:
-		$ docker run -p 0.0.0.0:32770:6379 -d redis
+		$ **docker run -p 0.0.0.0:32770:6379 -d redis**
 Or course you may change the access port from 32770 to anyother, but it should be properly 
 configured in file application.conf. This file should be in the same folder as the airporttest.jar
 

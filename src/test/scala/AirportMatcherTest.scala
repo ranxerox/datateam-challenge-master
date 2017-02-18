@@ -2,12 +2,19 @@ import com.agcat.airportstest.AirportMatcherHelper
 import org.junit.runner.RunWith
 import org.scalatest.Inspectors._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{BeforeAndAfterAll, Matchers}
 import redis.clients.jedis.Jedis
 
 @RunWith(classOf[JUnitRunner])
-class AirportMatcherTest extends org.scalatest.FunSuite with AirportMatcherHelper with Matchers {
+class AirportMatcherTest extends org.scalatest.FunSuite with AirportMatcherHelper with Matchers with BeforeAndAfterAll {
   val jedis = new Jedis(conf.getString("redis.ip"), conf.getInt("redis.port"))
+
+  override def beforeAll: Unit = {
+    println("cargando aeropuertos...")
+    loadAirports(jedis)
+
+    println(closestAirport(jedis, 52.489658, 13.455846))
+  }
 
   //ideally it should be read from a resource file inside Test Resource Folder
   val testSet = Seq(
@@ -21,6 +28,7 @@ class AirportMatcherTest extends org.scalatest.FunSuite with AirportMatcherHelpe
     (-33.86780166625977, 151.2073059082031, "RSE"),
     (51.18330001831055, 9.316699981689453, "FRZ")
   )
+
 
   test("Test Airports file Exists") {
     noException should be thrownBy getFileOrResource(conf.getString("data.airports")).size
@@ -36,4 +44,8 @@ class AirportMatcherTest extends org.scalatest.FunSuite with AirportMatcherHelpe
     forAll(testSet) { user => closestAirport(jedis, user._1, user._2) == user._3 should be(true) }
   }
 
+  override def afterAll: Unit = {
+    println("eliminando aeropuertos...")
+    jedis.flushAll()
+  }
 }
